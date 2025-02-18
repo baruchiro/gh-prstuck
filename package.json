@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@octokit/rest": "^20.0.2",
+    "@octokit/rest": "^21.1.1",
     "commander": "^12.0.0",
     "dotenv": "^16.4.4",
     "ink": "^5.1.0",
