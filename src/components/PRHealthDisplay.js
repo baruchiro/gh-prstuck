@@ -30,9 +30,23 @@ const buildPRTree = (prs) => {
     const prMap = new Map(prs.map(pr => [pr.url, { ...pr, children: [] }]));
     const roots = [];
 
+    // Create a map of head refs to PRs for quick lookup
+    const headRefToPR = new Map();
+    prMap.forEach((pr) => {
+        if (pr.head && pr.head.ref) {
+            headRefToPR.set(pr.head.ref, pr);
+        }
+    });
+
+    // Find parent-child relationships
     prMap.forEach(pr => {
-        if (pr.parentPrUrl && prMap.has(pr.parentPrUrl)) {
-            prMap.get(pr.parentPrUrl).children.push(pr);
+        if (pr.base && pr.base.ref) {
+            const parentPR = headRefToPR.get(pr.base.ref);
+            if (parentPR) {
+                parentPR.children.push(pr);
+            } else {
+                roots.push(pr);
+            }
         } else {
             roots.push(pr);
         }

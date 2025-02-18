@@ -27,6 +27,8 @@ export class PRHealthStore extends EventEmitter {
         try {
             const features = Object.entries(featurePRs);
 
+            const promises = [];
+
             // Process features sequentially to maintain feature order
             for (const [feature, prs] of features) {
                 this.results[feature] = [];
@@ -35,7 +37,7 @@ export class PRHealthStore extends EventEmitter {
                 // Create an array of promises that will each update the state when resolved
                 const prPromises = prs.map(async (pr, index) => {
                     try {
-                        const [prResult] = await this.prHealthService.checkPRsHealth([pr]);
+                        const prResult = await this.prHealthService.checkPRHealth(pr);
                         // Update results atomically
                         this.results[feature][index] = prResult;
                         this.emit('stateChanged', this.getState());
@@ -50,9 +52,10 @@ export class PRHealthStore extends EventEmitter {
                     }
                 });
 
-                // Wait for all PRs in this feature to complete
-                await Promise.all(prPromises);
+                promises.push(...prPromises);
             }
+
+            await Promise.all(promises);
         } catch (error) {
             this.error = error.message;
             this.emit('stateChanged', this.getState());
