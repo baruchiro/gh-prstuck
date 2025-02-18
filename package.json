@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "babel src -d dist",
-    "start": "npm run build && node dist/index.js"
+    "start": "yarn build && node dist/index.js"
   },
   "author": "",
   "license": "ISC",
