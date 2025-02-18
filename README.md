@@ -1,55 +1,57 @@
-# 🎯 PR Tracker - Your PR Life Organizer
+# 🔄 PRStuck - Where Stuck meets Stack!
 
-Ever felt like juggling PRs across repos is like herding cats? Say no more! PR Tracker is your new best friend in the GitHub jungle. 🌴
+Stuck with messy PR stacks? Can't untangle your PR dependencies? PRStuck is your escape hatch and stacking companion, all in one! Get unstuck and stack smarter! 🎯
 
-## ✨ What's This All About?
+## ✨ Why PRStuck?
 
-PR Tracker is a snazzy CLI tool that helps you:
-
-- 🚦 Spot troubled PRs (conflicts/CI fails) before they become a headache
-- 🔗 Track related PRs across different repos like a boss
-- 📚 Master your stacked PR game with dependency tracking
+- 🚨 **Get Unstuck**: Instantly spot conflicts and CI fails blocking your PRs
+- 📚 **Stack Better**: Master your stacked PRs with dependency tracking _(Coming Soon)_
+- 🔗 **Stack Together**: Track related PRs across repos like a pro _(Coming Soon)_
+- 💡 **Smart Stacking**: Get suggestions for optimal PR stacking order _(Coming Soon)_
 
 ## 🚀 Quick Start
 
 ```bash
-# Get the party started
-yarn install
+# Install the extension
+gh extension install baruchiro/gh-prstuck
 
-# Fire it up
-yarn start
-
-# Or if you're feeling fancy, build it
-yarn build
+# Check what's blocking your PRs
+gh prstuck stuck
 ```
 
 ## 🎮 Commands
 
-Coming soon! We're cooking up some magical commands to make your PR life easier.
+### Available Now
+- `gh prstuck stuck` - Find out what's keeping your PRs stuck
+
+### Coming Soon
+- `gh prstuck stack` - Visualize and manage your PR stack
+- `gh prstuck related` - Discover PRs that belong together
+- `gh prstuck deps` - Navigate your PR dependencies
 
 ## 🛠 Tech Stack
 
-- Node.js - Because JavaScript is life
-- GitHub API - Our window to the PR world
-- Ink - Making terminals look gorgeous
-- Vite - Building at the speed of light
+- Node.js - For the core engine
+- GitHub API - Your window to the PR world
+- Ink - Making your terminal beautiful
+- React - For smooth interactive experiences
 
 ## 💡 Pro Tips
 
-- Keep your terminal happy with a modern font for the best experience
-- Set up your GitHub token (we'll tell you how, don't worry!)
-- Prepare for some colorful terminal magic ✨
+- Keep your PRs stacked, not stuck! 📚
+- Set up your GitHub token for full power
+- Watch the magic happen in your colorful terminal ✨
 
 ## 🤝 Contributing
 
-Found a bug? Got a cool idea? PRs are welcome! Just make sure to:
+Found a bug? Got a cool idea? PRs are welcome! Just remember:
 1. Keep it simple and clean
 2. Test your changes
-3. Be awesome (you already are!)
+3. Stack responsibly! 
 
 ## 📝 License
 
-MIT - Because sharing is caring! 
+MIT - Stack freely! 
 
 ---
-Crafted with AI magic ✨ 
+Never get stuck, always stack right! ✨ 

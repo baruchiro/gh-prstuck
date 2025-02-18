@@ -4,14 +4,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Debug PR Tracker",
+            "name": "Debug PRStuck",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "runtimeExecutable": "yarn",
             "runtimeArgs": [
                 "dev",
-                "check-health"
+                "stuck"
             ],
             "sourceMaps": true,
             "resolveSourceMapLocations": [

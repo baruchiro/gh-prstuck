@@ -1,14 +1,18 @@
 {
-  "name": "pr-tracker",
+  "name": "gh-prstuck",
   "version": "1.0.0",
-  "description": "GitHub PR Management Tool",
+  "description": "GitHub PR Management Tool - GitHub CLI Extension",
   "main": "src/index.js",
   "type": "module",
+  "bin": {
+    "gh-prstuck": "./dist/index.js"
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "build": "yarn clean && swc src -d dist",
     "start": "yarn build && node dist/index.js",
-    "dev": "yarn build && node dist/index.js"
+    "dev": "yarn build && node dist/index.js",
+    "postinstall": "gh extension install ."
   },
   "author": "",
   "license": "ISC",
