@@ -30,6 +30,7 @@ export class PRHealthService {
       return {
         url: pr.url,
         title: pr.title,
+        draft: pr.draft,
         status: issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY',
         issues: issues.length > 0 ? issues : []
       };

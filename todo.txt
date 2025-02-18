@@ -1,4 +1,8 @@
 - [x] Replace npm with yarn
+- Show PR as dependency (if one PR want to be merged into another one)
+- Draft status
 - use Vite instead of babel
 - Implement as GitHub CLI Extension
 - Fetch the PRs for a feature from a Project Managements system like Jira or Clickup
+- remote shared status file
+- Reactive fetch (start render from the first PR response)

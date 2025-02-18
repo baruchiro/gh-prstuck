@@ -32,6 +32,7 @@ export class GitHubService {
             return {
                 url: prUrl,
                 title: pr.title,
+                draft: pr.draft,
                 mergeable: pr.mergeable,
                 mergeable_state: pr.mergeable_state,
                 checks: checks.check_runs.map(check => ({

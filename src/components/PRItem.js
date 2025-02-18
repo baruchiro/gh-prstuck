@@ -24,9 +24,12 @@ const PRItem = ({ pr, isFirstInRepo }) => {
 
     return (
         <Box flexDirection="column">
-            <Text bold color={statusColor}>
-                {createHyperlink(pr.title, pr.url)}
-            </Text>
+            <Box>
+                <Text color={pr.draft ? 'gray' : 'green'}>{pr.draft ? '○' : '●'} </Text>
+                <Text bold color={statusColor}>
+                    {createHyperlink(pr.title, pr.url)}
+                </Text>
+            </Box>
 
             {pr.issues && pr.issues.length > 0 && (
                 <Box flexDirection="column" marginLeft={2}>

@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink';
 import React from 'react';
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 const getStatusColor = status => {
   switch (status) {
     case 'HEALTHY':
@@ -25,10 +25,15 @@ const PRItem = ({
   const statusColor = getStatusColor(pr.status);
   return /*#__PURE__*/_jsxs(Box, {
     flexDirection: "column",
-    children: [/*#__PURE__*/_jsx(Text, {
-      bold: true,
-      color: statusColor,
-      children: createHyperlink(pr.title, pr.url)
+    children: [/*#__PURE__*/_jsxs(Box, {
+      children: [/*#__PURE__*/_jsxs(Text, {
+        color: pr.draft ? 'gray' : 'green',
+        children: [pr.draft ? '○' : '●', " "]
+      }), /*#__PURE__*/_jsx(Text, {
+        bold: true,
+        color: statusColor,
+        children: createHyperlink(pr.title, pr.url)
+      })]
     }), pr.issues && pr.issues.length > 0 && /*#__PURE__*/_jsx(Box, {
       flexDirection: "column",
       marginLeft: 2,
