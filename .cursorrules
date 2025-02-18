@@ -1,0 +1,21 @@
+# Project Context: GitHub PR Management Tool
+
+## User Stories
+
+1. As a developer, I want to know which of my PRs is not ready, by a conflict or failing CI, in order to keep it updated.
+2. As a release manager, I want to know which PRs in different repositories are related to a feature to merge them all together.
+3. As a developer, I want to see the dependencies of my PRs, when working with stacked PR, to control my flow.
+
+## Technical Decisions
+
+- Language: JavaScript/Node.js
+- Integration: GitHub API (REST/GraphQL)
+- Interface: CLI tool
+- Initial Scope: No webhooks/real-time updates
+- Package Manager: yarn
+
+## Architecture Rules
+
+1. Don't boilerplate with controllers and services and utils. Keep it simple and clean.
+
+## CLI Commands
