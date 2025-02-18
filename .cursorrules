@@ -13,9 +13,13 @@
 - Interface: CLI tool
 - Initial Scope: No webhooks/real-time updates
 - Package Manager: yarn
+- Build Tools: Vite
 
 ## Architecture Rules
 
 1. Don't boilerplate with controllers and services and utils. Keep it simple and clean.
+1. Use `ink` library to show interactive reactive Terminal UI.
+1. On UI, try to reduce text as possible, use clickable text instead of printing full link url, use colors instead of writing status.
+1. Prefer not writing comments on code, but if necessary, use it to explain why of the code.
 
 ## CLI Commands
