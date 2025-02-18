@@ -5,6 +5,15 @@ export class PRHealthService {
   }
   async checkPRsHealth(prs) {
     const results = await Promise.all(prs.map(pr => this.githubService.getPRStatus(pr)));
+
+    // First pass to collect all head branches
+    const headBranches = new Map();
+    results.forEach(pr => {
+      if (!pr.error && pr.head) {
+        const key = `${pr.head.repo}:${pr.head.ref}`;
+        headBranches.set(key, pr.url);
+      }
+    });
     return results.map(pr => {
       if (pr.error) {
         return {
@@ -27,12 +36,17 @@ export class PRHealthService {
           issues.push(`Failing checks: ${failingChecks.map(check => check.name).join(', ')}`);
         }
       }
+
+      // Find parent PR if this PR's base branch matches another PR's head branch
+      const parentKey = `${pr.base.repo}:${pr.base.ref}`;
+      const parentPrUrl = headBranches.get(parentKey);
       return {
         url: pr.url,
         title: pr.title,
         draft: pr.draft,
         status: issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY',
-        issues: issues.length > 0 ? issues : []
+        issues: issues.length > 0 ? issues : [],
+        parentPrUrl
       };
     });
   }

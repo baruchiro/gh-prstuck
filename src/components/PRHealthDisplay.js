@@ -25,6 +25,32 @@ const padToWidth = (str, width) => {
 
 const REPO_COLUMN_WIDTH = 25;
 
+// Build PR hierarchy tree
+const buildPRTree = (prs) => {
+    const prMap = new Map(prs.map(pr => [pr.url, { ...pr, children: [] }]));
+    const roots = [];
+
+    prMap.forEach(pr => {
+        if (pr.parentPrUrl && prMap.has(pr.parentPrUrl)) {
+            prMap.get(pr.parentPrUrl).children.push(pr);
+        } else {
+            roots.push(pr);
+        }
+    });
+
+    return roots;
+};
+
+// Render PR tree recursively
+const renderPRTree = (pr, level = 0) => {
+    return (
+        <Box key={pr.url} flexDirection="column">
+            <PRItem pr={pr} level={level} />
+            {pr.children.map(child => renderPRTree(child, level + 1))}
+        </Box>
+    );
+};
+
 const PRHealthDisplay = ({ results }) => {
     return (
         <Box flexDirection="column" padding={1}>
@@ -36,13 +62,7 @@ const PRHealthDisplay = ({ results }) => {
                             <Box marginLeft={2}>
                                 <Text color="gray">{padToWidth(repo, REPO_COLUMN_WIDTH)}</Text>
                                 <Box flexDirection="column">
-                                    {repoPRs.map((pr, index) => (
-                                        <PRItem
-                                            key={`${pr.url}-${index}`}
-                                            pr={pr}
-                                            isFirstInRepo={index === 0}
-                                        />
-                                    ))}
+                                    {buildPRTree(repoPRs).map(pr => renderPRTree(pr))}
                                 </Box>
                             </Box>
                         </Box>

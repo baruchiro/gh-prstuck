@@ -35,6 +35,16 @@ export class GitHubService {
                 draft: pr.draft,
                 mergeable: pr.mergeable,
                 mergeable_state: pr.mergeable_state,
+                base: {
+                    ref: pr.base.ref,
+                    sha: pr.base.sha,
+                    repo: pr.base.repo.full_name
+                },
+                head: {
+                    ref: pr.head.ref,
+                    sha: pr.head.sha,
+                    repo: pr.head.repo.full_name
+                },
                 checks: checks.check_runs.map(check => ({
                     name: check.name,
                     status: check.status,

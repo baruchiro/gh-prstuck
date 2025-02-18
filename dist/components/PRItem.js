@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink';
 import React from 'react';
-import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 const getStatusColor = status => {
   switch (status) {
     case 'HEALTHY':
@@ -20,13 +20,21 @@ const createHyperlink = (text, url) => {
 };
 const PRItem = ({
   pr,
-  isFirstInRepo
+  isFirstInRepo,
+  level = 0
 }) => {
   const statusColor = getStatusColor(pr.status);
+  const titlePadding = level > 0 ? ('  '.repeat(level - 1) + '└──').length : 0;
   return /*#__PURE__*/_jsxs(Box, {
     flexDirection: "column",
     children: [/*#__PURE__*/_jsxs(Box, {
-      children: [/*#__PURE__*/_jsxs(Text, {
+      children: [level > 1 && /*#__PURE__*/_jsx(Text, {
+        color: "gray",
+        children: '  '.repeat(level - 1)
+      }), level > 0 && /*#__PURE__*/_jsx(Text, {
+        color: "gray",
+        children: "\u2514\u2500\u2500"
+      }), /*#__PURE__*/_jsxs(Text, {
         color: pr.draft ? 'gray' : 'green',
         children: [pr.draft ? '○' : '●', " "]
       }), /*#__PURE__*/_jsx(Text, {
@@ -36,7 +44,7 @@ const PRItem = ({
       })]
     }), pr.issues && pr.issues.length > 0 && /*#__PURE__*/_jsx(Box, {
       flexDirection: "column",
-      marginLeft: 2,
+      marginLeft: 2 + titlePadding,
       children: pr.issues.map((issue, index) => /*#__PURE__*/_jsxs(Text, {
         color: "red",
         children: ["\u2022 ", issue]
