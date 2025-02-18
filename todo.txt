@@ -2,7 +2,7 @@
 - [x] Show PR as dependency (if one PR want to be merged into another one)
 - [x] Draft status
 - [x] use Vite instead of babel
-- Reactive fetch (start render from the first PR response)
+- [x] Reactive fetch (start render from the first PR response)
 - Readme
 - List all my PRs/assigned to me and ask me where to add them
 - Implement as GitHub CLI Extension
