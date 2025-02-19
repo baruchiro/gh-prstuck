@@ -5,7 +5,10 @@ export class PRHealthStore extends EventEmitter {
     constructor() {
         super();
         this.prHealthService = new PRHealthService();
-        this.results = {};
+        this.results = {
+            Features: {},
+            prs: {}
+        };
         this.loading = true;
         this.error = null;
     }
@@ -21,34 +24,41 @@ export class PRHealthStore extends EventEmitter {
     async checkHealth(featurePRs) {
         this.loading = true;
         this.error = null;
-        this.results = {};
+        this.results = {
+            Features: {},
+            prs: {}
+        };
         this.emit('stateChanged', this.getState());
 
         try {
-            const features = Object.entries(featurePRs);
-
+            const features = Object.entries(featurePRs.Features || featurePRs);
             const promises = [];
 
             // Process features sequentially to maintain feature order
-            for (const [feature, prs] of features) {
-                this.results[feature] = [];
+            for (const [featureName, feature] of features) {
+                // Initialize feature structure
+                this.results.Features[featureName] = {
+                    prs: feature.prs || feature,
+                    dependencies: feature.dependencies || []
+                };
                 this.emit('stateChanged', this.getState());
 
                 // Create an array of promises that will each update the state when resolved
-                const prPromises = prs.map(async (pr, index) => {
+                const prPromises = this.results.Features[featureName].prs.map(async (pr) => {
                     try {
                         const prResult = await this.prHealthService.checkPRHealth(pr);
-                        // Update results atomically
-                        this.results[feature][index] = prResult;
+                        // Store PR results in the prs map
+                        this.results.prs[pr] = prResult;
                         this.emit('stateChanged', this.getState());
                         return prResult;
                     } catch (error) {
                         console.error(`Error processing PR ${pr}:`, error);
-                        return {
+                        this.results.prs[pr] = {
                             url: pr,
                             error: error.message,
                             status: 'ERROR'
                         };
+                        return this.results.prs[pr];
                     }
                 });
 
