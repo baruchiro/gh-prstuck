@@ -10,6 +10,27 @@ export class GitHubService {
         });
     }
 
+    async getMyPRs() {
+        try {
+            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
+                q: 'is:pr is:open author:@me',
+                sort: 'updated',
+                order: 'desc',
+                per_page: 100
+            });
+
+            return prs.items.map(pr => ({
+                url: pr.html_url,
+                title: pr.title,
+                draft: pr.draft || false,
+                repository: pr.repository_url.split('/').slice(-1)[0]
+            }));
+        } catch (error) {
+            console.error('Error fetching PRs:', error.message);
+            throw error;
+        }
+    }
+
     async getPRStatus(prUrl) {
         try {
             // Extract owner, repo, and PR number from URL

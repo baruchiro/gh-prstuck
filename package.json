@@ -12,7 +12,7 @@
     "build": "yarn clean && swc src -d dist",
     "start": "yarn build && node dist/index.js",
     "dev": "yarn build && node dist/index.js",
-    "postinstall": "gh extension install ."
+    "postinstall": "gh extension install --force ."
   },
   "author": "",
   "license": "ISC",
