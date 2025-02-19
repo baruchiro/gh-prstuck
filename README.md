@@ -27,6 +27,9 @@ gh prstuck list
 ### Available Now
 - `gh prstuck stuck` - Find out what's keeping your PRs stuck
 - `gh prstuck list` - Interactive UI to organize PRs into features
+  - Press `a` to view your authored PRs
+  - Press `r` to view PRs where you're requested as reviewer
+  - Press `s` to view PRs assigned to you
   - Navigate with ↑/↓ arrows
   - Press Enter to select a PR
   - Choose existing feature or create new one
@@ -51,6 +54,7 @@ gh prstuck list
   GITHUB_TOKEN=your_github_token
   ```
 - Use the `list` command to group related PRs across repositories
+- Switch between PR lists with a single keystroke (a/r/s)
 - Watch the magic happen in your colorful terminal ✨
 
 ## 🤝 Contributing

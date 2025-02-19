@@ -31,6 +31,48 @@ export class GitHubService {
         }
     }
 
+    async getPRsToReview() {
+        try {
+            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
+                q: 'is:pr is:open review-requested:@me',
+                sort: 'updated',
+                order: 'desc',
+                per_page: 100
+            });
+
+            return prs.items.map(pr => ({
+                url: pr.html_url,
+                title: pr.title,
+                draft: pr.draft || false,
+                repository: pr.repository_url.split('/').slice(-1)[0]
+            }));
+        } catch (error) {
+            console.error('Error fetching PRs to review:', error.message);
+            throw error;
+        }
+    }
+
+    async getAssignedPRs() {
+        try {
+            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
+                q: 'is:pr is:open assignee:@me',
+                sort: 'updated',
+                order: 'desc',
+                per_page: 100
+            });
+
+            return prs.items.map(pr => ({
+                url: pr.html_url,
+                title: pr.title,
+                draft: pr.draft || false,
+                repository: pr.repository_url.split('/').slice(-1)[0]
+            }));
+        } catch (error) {
+            console.error('Error fetching assigned PRs:', error.message);
+            throw error;
+        }
+    }
+
     async getPRStatus(prUrl) {
         try {
             // Extract owner, repo, and PR number from URL

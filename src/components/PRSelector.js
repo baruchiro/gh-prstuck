@@ -11,10 +11,8 @@ const padToWidth = (str, width) => {
 
 const PRSelector = ({ existingFeatures, onSave }) => {
     const { stdout } = useStdout();
-    // Reserve 5 lines for UI elements (title, messages, etc)
     const visibleItems = stdout.rows - 5;
 
-    // Track selected PRs in state instead of recalculating
     const [state, setState] = useState({
         loading: true,
         error: null,
@@ -22,64 +20,67 @@ const PRSelector = ({ existingFeatures, onSave }) => {
         features: Object.keys(existingFeatures),
         selectedPR: 0,
         scrollOffset: 0,
-        mode: 'pr', // 'pr' or 'feature'
+        mode: 'pr',
         newFeature: '',
         selectedFeature: 0,
         repoColumnWidth: 20,
-        selectedPRs: new Set(Object.values(existingFeatures).flat()), // Track selected PRs in state
-        updatedFeatures: existingFeatures // Track feature updates locally
+        selectedPRs: new Set(Object.values(existingFeatures).flat()),
+        updatedFeatures: existingFeatures,
+        listType: 'authored' // 'authored' or 'review' or 'assigned'
     });
 
-    // Find next available PR
     const findNextAvailablePR = (currentIndex, direction = 1) => {
-        const prs = state.prs;
         let nextIndex = currentIndex;
 
         while (true) {
             nextIndex += direction;
-            if (nextIndex < 0 || nextIndex >= prs.length) return currentIndex;
-            if (!state.selectedPRs.has(prs[nextIndex].url)) return nextIndex;
+            if (nextIndex < 0 || nextIndex >= state.prs.length) return currentIndex;
+            if (!state.selectedPRs.has(state.prs[nextIndex].url)) return nextIndex;
+        }
+    };
+
+    const loadPRs = async (type) => {
+        setState(s => ({ ...s, loading: true, error: null }));
+        try {
+            const github = new GitHubService();
+            const prs = await (
+                type === 'authored' ? github.getMyPRs() :
+                    type === 'review' ? github.getPRsToReview() :
+                        github.getAssignedPRs()
+            );
+
+            const maxRepoLength = Math.min(
+                30,
+                Math.max(10,
+                    ...prs.map(pr => pr.repository.length)
+                )
+            );
+
+            let initialSelectedPR = 0;
+            for (let i = 0; i < prs.length; i++) {
+                if (!state.selectedPRs.has(prs[i].url)) {
+                    initialSelectedPR = i;
+                    break;
+                }
+            }
+
+            setState(s => ({
+                ...s,
+                loading: false,
+                prs,
+                selectedPR: initialSelectedPR,
+                scrollOffset: 0,
+                repoColumnWidth: maxRepoLength + 2
+            }));
+        } catch (error) {
+            setState(s => ({ ...s, loading: false, error: error.message }));
         }
     };
 
     useEffect(() => {
-        const loadPRs = async () => {
-            try {
-                const github = new GitHubService();
-                const prs = await github.getMyPRs();
-                // Calculate maximum repository name length
-                const maxRepoLength = Math.min(
-                    30, // max allowed
-                    Math.max(10, // min width
-                        ...prs.map(pr => pr.repository.length)
-                    )
-                );
+        loadPRs(state.listType);
+    }, [state.listType]);
 
-                // Find first unselected PR
-                let initialSelectedPR = 0;
-                for (let i = 0; i < prs.length; i++) {
-                    if (!state.selectedPRs.has(prs[i].url)) {
-                        initialSelectedPR = i;
-                        break;
-                    }
-                }
-
-                setState(s => ({
-                    ...s,
-                    loading: false,
-                    prs,
-                    selectedPR: initialSelectedPR,
-                    repoColumnWidth: maxRepoLength + 2 // +2 for brackets
-                }));
-            } catch (error) {
-                setState(s => ({ ...s, loading: false, error: error.message }));
-            }
-        };
-
-        loadPRs();
-    }, []);
-
-    // Adjust scroll offset when selection changes
     useEffect(() => {
         if (state.mode === 'pr') {
             if (state.selectedPR < state.scrollOffset) {
@@ -108,6 +109,12 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                     ...s,
                     selectedPR: findNextAvailablePR(s.selectedPR, 1)
                 }));
+            } else if (input === 'a' && state.listType !== 'authored') {
+                setState(s => ({ ...s, listType: 'authored' }));
+            } else if (input === 'r' && state.listType !== 'review') {
+                setState(s => ({ ...s, listType: 'review' }));
+            } else if (input === 's' && state.listType !== 'assigned') {
+                setState(s => ({ ...s, listType: 'assigned' }));
             } else if (key.return) {
                 const pr = state.prs[state.selectedPR];
                 if (!state.selectedPRs.has(pr.url)) {
@@ -137,13 +144,12 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                             pr.url
                         ]
                     };
-                    // Update local state only
                     setState(s => ({
                         ...s,
                         mode: 'pr',
                         selectedPRs: new Set([...s.selectedPRs, pr.url]),
                         selectedPR: findNextAvailablePR(s.selectedPR, 1),
-                        updatedFeatures: updatedFeatures // Update features locally
+                        updatedFeatures: updatedFeatures
                     }));
                 }
             } else if (key.escape) {
@@ -156,14 +162,13 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                     ...state.updatedFeatures,
                     [state.newFeature]: [pr.url]
                 };
-                // Update local state only
                 setState(s => ({
                     ...s,
                     mode: 'pr',
                     features: [...s.features, state.newFeature],
                     selectedPRs: new Set([...s.selectedPRs, pr.url]),
                     selectedPR: findNextAvailablePR(s.selectedPR, 1),
-                    updatedFeatures: updatedFeatures // Update features locally
+                    updatedFeatures: updatedFeatures
                 }));
             } else if (key.escape) {
                 setState(s => ({ ...s, mode: 'feature' }));
@@ -181,18 +186,36 @@ const PRSelector = ({ existingFeatures, onSave }) => {
         }
     });
 
+    const renderStatusBar = () => (
+        <Box>
+            <Text color="gray">[</Text>
+            <Text color={state.listType === 'authored' ? 'blue' : 'gray'}>A</Text>
+            <Text color="gray">] Authored | [</Text>
+            <Text color={state.listType === 'review' ? 'blue' : 'gray'}>R</Text>
+            <Text color="gray">] Review | [</Text>
+            <Text color={state.listType === 'assigned' ? 'blue' : 'gray'}>S</Text>
+            <Text color="gray">] Assigned</Text>
+        </Box>
+    );
+
     if (state.loading) {
         return (
-            <Box>
-                <Text color="yellow">Loading your PRs...</Text>
+            <Box flexDirection="column" padding={1}>
+                {renderStatusBar()}
+                <Box marginTop={1}>
+                    <Text color="yellow">Loading PRs...</Text>
+                </Box>
             </Box>
         );
     }
 
     if (state.error) {
         return (
-            <Box>
-                <Text color="red">Error: {state.error}</Text>
+            <Box flexDirection="column" padding={1}>
+                {renderStatusBar()}
+                <Box marginTop={1}>
+                    <Text color="red">Error: {state.error}</Text>
+                </Box>
             </Box>
         );
     }
@@ -211,7 +234,8 @@ const PRSelector = ({ existingFeatures, onSave }) => {
 
     return (
         <Box flexDirection="column" padding={1}>
-            <Text bold>Select a PR to organize (↑↓ to move, Enter to select, Esc to save)</Text>
+            {renderStatusBar()}
+            <Text bold marginTop={1}>Select a PR to organize (↑↓ to move, Enter to select, Esc to save)</Text>
             <Box flexDirection="column" marginTop={1}>
                 {state.mode === 'pr' && renderList(
                     state.prs,
