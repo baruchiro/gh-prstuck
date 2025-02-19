@@ -17,14 +17,14 @@ const PRSelector = ({ existingFeatures, onSave }) => {
         loading: true,
         error: null,
         prs: [],
-        features: Object.keys(existingFeatures),
+        features: Object.keys(existingFeatures.Features || {}),
         selectedPR: 0,
         scrollOffset: 0,
         mode: 'pr',
         newFeature: '',
         selectedFeature: 0,
         repoColumnWidth: 20,
-        selectedPRs: new Set(Object.values(existingFeatures).flat()),
+        selectedPRs: new Set(Object.values(existingFeatures.Features || {}).flatMap(feature => feature.prs || [])),
         updatedFeatures: existingFeatures,
         listType: 'authored' // 'authored' or 'review' or 'assigned'
     });
@@ -139,10 +139,16 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                     const feature = state.features[state.selectedFeature];
                     const updatedFeatures = {
                         ...state.updatedFeatures,
-                        [feature]: [
-                            ...(state.updatedFeatures[feature] || []),
-                            pr.url
-                        ]
+                        Features: {
+                            ...state.updatedFeatures.Features,
+                            [feature]: {
+                                prs: [
+                                    ...(state.updatedFeatures.Features?.[feature]?.prs || []),
+                                    pr.url
+                                ],
+                                dependencies: state.updatedFeatures.Features?.[feature]?.dependencies || []
+                            }
+                        }
                     };
                     setState(s => ({
                         ...s,
@@ -160,7 +166,13 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                 const pr = state.prs[state.selectedPR];
                 const updatedFeatures = {
                     ...state.updatedFeatures,
-                    [state.newFeature]: [pr.url]
+                    Features: {
+                        ...state.updatedFeatures.Features,
+                        [state.newFeature]: {
+                            prs: [pr.url],
+                            dependencies: []
+                        }
+                    }
                 };
                 setState(s => ({
                     ...s,
