@@ -5,7 +5,7 @@ Stuck with messy PR stacks? Can't untangle your PR dependencies? PRStuck is your
 ## ✨ Why PRStuck?
 
 - 🚨 **Get Unstuck**: Instantly spot conflicts and CI fails blocking your PRs
-- 📚 **Stack Better**: Master your stacked PRs with dependency tracking _(Coming Soon)_
+- 📚 **Stack Better**: Master your stacked PRs with dependency tracking
 - 🔗 **Stack Together**: Track related PRs across repos like a pro
 - 💡 **Smart Stacking**: Get suggestions for optimal PR stacking order _(Coming Soon)_
 
@@ -20,11 +20,15 @@ gh prstuck stuck
 
 # Organize your PRs into features
 gh prstuck list
+
+# Manage feature dependencies
+gh prstuck features
 ```
 
 ## 🎮 Commands
 
 ### Available Now
+
 - `gh prstuck stuck` - Find out what's keeping your PRs stuck
 - `gh prstuck list` - Interactive UI to organize PRs into features
   - Press `a` to view your authored PRs
@@ -34,10 +38,12 @@ gh prstuck list
   - Press Enter to select a PR
   - Choose existing feature or create new one
   - Press Esc to save and exit
-
-### Coming Soon
-- `gh prstuck stack` - Visualize and manage your PR stack
-- `gh prstuck deps` - Navigate your PR dependencies
+- `gh prstuck features` - Manage feature hierarchies and dependencies
+  - Navigate with ↑/↓ arrows
+  - Press Enter to manage a feature's dependencies
+  - Press Space to toggle dependencies
+  - Press Esc to save and return
+  - Create new features with no PRs
 
 ## 🛠 Tech Stack
 
@@ -54,19 +60,22 @@ gh prstuck list
   GITHUB_TOKEN=your_github_token
   ```
 - Use the `list` command to group related PRs across repositories
+- Use the `features` command to define dependencies between features
 - Switch between PR lists with a single keystroke (a/r/s)
 - Watch the magic happen in your colorful terminal ✨
 
 ## 🤝 Contributing
 
 Found a bug? Got a cool idea? PRs are welcome! Just remember:
+
 1. Keep it simple and clean
 2. Test your changes
-3. Stack responsibly! 
+3. Stack responsibly!
 
 ## 📝 License
 
-MIT - Stack freely! 
+MIT - Stack freely!
 
 ---
-Never get stuck, always stack right! ✨ 
+
+Never get stuck, always stack right! ✨
