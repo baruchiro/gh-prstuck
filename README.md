@@ -9,6 +9,8 @@ Stuck with messy PR stacks? Can't untangle your PR dependencies? PRStuck is your
 - 🔗 **Stack Together**: Track related PRs across repos like a pro
 - 💡 **Smart Stacking**: Get suggestions for optimal PR stacking order _(Coming Soon)_
 
+![PRStuck Demo](./docs/screenshot.png)
+
 ## 🚀 Quick Start
 
 ```bash
@@ -63,6 +65,14 @@ gh prstuck features
 - Use the `features` command to define dependencies between features
 - Switch between PR lists with a single keystroke (a/r/s)
 - Watch the magic happen in your colorful terminal ✨
+
+## 🗺️ Roadmap
+
+Here's what's coming next:
+
+- 🔄 Implement as GitHub CLI Extension
+- 🔗 Fetch PRs from Project Management systems (Jira, ClickUp)
+- ☁️ Remote shared status file support
 
 ## 🤝 Contributing
 
