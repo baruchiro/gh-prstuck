@@ -1,13 +1,39 @@
 # 🔄 PRStuck - Where Stuck meets Stack!
 
-Stuck with messy PR stacks? Can't untangle your PR dependencies? PRStuck is your escape hatch and stacking companion, all in one! Get unstuck and stack smarter! 🎯
+Ever felt overwhelmed managing multiple open PRs? PRStuck helps you take control of your PR workflow, whether they're blocked, stacked, or scattered across repos! 🎯
 
-## ✨ Why PRStuck?
+## 😫 The Pain Points
 
-- 🚨 **Get Unstuck**: Instantly spot conflicts and CI fails blocking your PRs
-- 📚 **Stack Better**: Master your stacked PRs with dependency tracking
-- 🔗 **Stack Together**: Track related PRs across repos like a pro
-- 💡 **Smart Stacking**: Get suggestions for optimal PR stacking order _(Coming Soon)_
+Managing multiple open PRs can be chaotic and frustrating:
+
+- 🕒 **Review Bottlenecks**: PRs sitting idle waiting for reviews
+- 🏗️ **Large Features**: Big changes split across multiple PRs that need to land together
+- ⏳ **CI/Test Delays**: PRs blocked by failing tests or long-running CI
+- 📦 **Dependencies**: PRs that can't merge until other PRs are merged first
+- 👥 **Team Coordination**: PRs blocked waiting for other team members' work
+- 🌐 **Cross-Repo Dependencies**: PRs that depend on changes in different repositories
+
+## ✨ How PRStuck Helps
+
+- 🚨 **Get Unstuck**: 
+  - Instantly spot which PRs have conflicts or failing CI
+  - See which PRs are waiting for reviews
+  - Track PRs blocked by dependencies
+  
+- 📚 **Stack Better**: 
+  - Visualize PR dependencies in a clear hierarchy
+  - Understand which PRs need to merge first
+  - Get notified when dependent PRs are ready to merge
+
+- 🔗 **Stack Together**: 
+  - Track related PRs across multiple repositories
+  - Group PRs by features or initiatives
+  - Coordinate merging of dependent PRs
+
+- 💡 **Smart Stacking**: 
+  - Get suggestions for optimal PR stacking order _(Coming Soon)_
+  - Automated dependency detection
+  - Smart merge order recommendations
 
 ![PRStuck Demo](./docs/screenshot.png)
 
