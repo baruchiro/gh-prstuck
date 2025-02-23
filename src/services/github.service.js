@@ -98,6 +98,8 @@ export class GitHubService {
                 draft: pr.draft,
                 mergeable: pr.mergeable,
                 mergeable_state: pr.mergeable_state,
+                state: pr.state,
+                merged: pr.merged,
                 base: {
                     ref: pr.base.ref,
                     sha: pr.base.sha,

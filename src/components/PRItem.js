@@ -23,14 +23,38 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
     const statusColor = getStatusColor(pr.status);
     const titlePadding = level > 0 ? ('  '.repeat(level - 1) + '└──').length : 0;
 
+    // Determine PR state indicator and color
+    let stateIndicator = pr.draft ? '○' : '●';  // Keep draft indicator separate
+    let stateColor = pr.draft ? 'gray' : 'green';
+    let titleColor = statusColor;
+    let isBold = true;
+    let titleDecorator = '';
+
+    if (pr.merged) {
+        stateIndicator = '✓';
+        stateColor = '#2E8B57'; // Sea green - more muted but still clearly "success"
+        titleColor = '#708090'; // Slate gray - readable but de-emphasized
+        isBold = false;
+    } else if (pr.state === 'closed') {
+        stateIndicator = '×';
+        stateColor = 'gray';
+        titleColor = 'gray';
+        titleDecorator = '\u0336'; // Add strikethrough by inserting this character between each character
+    }
+
+    const decorateText = (text) => {
+        if (!titleDecorator) return text;
+        return text.split('').join(titleDecorator) + titleDecorator;
+    };
+
     return (
         <Box flexDirection="column">
             <Box>
                 {level > 1 && <Text color="gray">{'  '.repeat(level - 1)}</Text>}
                 {level > 0 && <Text color="gray">└──</Text>}
-                <Text color={pr.draft ? 'gray' : 'green'}>{pr.draft ? '○' : '●'} </Text>
-                <Text bold color={statusColor}>
-                    {createHyperlink(pr.title, pr.url)}
+                <Text color={stateColor}>{stateIndicator} </Text>
+                <Text bold={isBold} color={titleColor}>
+                    {createHyperlink(decorateText(pr.title), pr.url)}
                 </Text>
             </Box>
 
