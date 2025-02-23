@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { readFile, writeFile } from 'fs/promises';
 import { render } from 'ink';
 import App from './components/App.js';
+import Cleanup from './components/Cleanup.js';
 import FeatureManager from './components/FeatureManager.js';
 import PRSelector from './components/PRSelector.js';
 
@@ -80,6 +81,38 @@ program
 
             // Render the feature manager UI
             const { waitUntilExit } = render(<FeatureManager
+                existingFeatures={existingFeatures}
+                onSave={async (features) => {
+                    await writeFile(options.file, JSON.stringify(features, null, 4));
+                    process.exit(0);
+                }}
+            />);
+
+            await waitUntilExit();
+        } catch (error) {
+            console.error('Error:', error.message);
+            process.exit(1);
+        }
+    });
+
+program
+    .command('cleanup')
+    .description('Remove closed/merged PRs and empty features')
+    .option('-f, --file <path>', 'Path to JSON file containing PR lists', 'status.json')
+    .action(async (options) => {
+        try {
+            // Try to read existing features from status file
+            let existingFeatures = {};
+            try {
+                const fileContent = await readFile(options.file, 'utf8');
+                existingFeatures = JSON.parse(fileContent);
+            } catch (error) {
+                // File doesn't exist or is invalid, start with empty features
+                existingFeatures = { Features: {} };
+            }
+
+            // Render the cleanup UI
+            const { waitUntilExit } = render(<Cleanup
                 existingFeatures={existingFeatures}
                 onSave={async (features) => {
                     await writeFile(options.file, JSON.stringify(features, null, 4));

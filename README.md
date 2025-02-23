@@ -59,19 +59,8 @@ gh prstuck features
 
 - `gh prstuck stuck` - Find out what's keeping your PRs stuck
 - `gh prstuck list` - Interactive UI to organize PRs into features
-  - Press `a` to view your authored PRs
-  - Press `r` to view PRs where you're requested as reviewer
-  - Press `s` to view PRs assigned to you
-  - Navigate with ↑/↓ arrows
-  - Press Enter to select a PR
-  - Choose existing feature or create new one
-  - Press Esc to save and exit
 - `gh prstuck features` - Manage feature hierarchies and dependencies
-  - Navigate with ↑/↓ arrows
-  - Press Enter to manage a feature's dependencies
-  - Press Space to toggle dependencies
-  - Press Esc to save and return
-  - Create new features with no PRs
+- `gh prstuck cleanup` - Remove closed/merged PRs and empty features
 
 ## 🛠 Tech Stack
 
