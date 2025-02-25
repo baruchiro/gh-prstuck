@@ -92,6 +92,34 @@ export class GitHubService {
                 ref: pr.head.sha
             });
 
+            // Get reviews
+            const { data: reviews } = await this.octokit.pulls.listReviews({
+                owner,
+                repo,
+                pull_number: parseInt(prNumber)
+            });
+
+            // Process reviews to get latest state per reviewer
+            const latestReviews = new Map();
+            reviews.forEach(review => {
+                if (review.state !== 'COMMENTED') { // Only track approval/rejection states
+                    latestReviews.set(review.user.login, review);
+                }
+            });
+
+            const reviewSummary = {
+                approved: Array.from(latestReviews.values()).filter(r => r.state === 'APPROVED').length,
+                changes_requested: Array.from(latestReviews.values()).filter(r => r.state === 'CHANGES_REQUESTED').length,
+                reviewers: pr.requested_reviewers.map(r => r.login),
+                // Add reviewer names
+                approvers: Array.from(latestReviews.values())
+                    .filter(r => r.state === 'APPROVED')
+                    .map(r => r.user.login),
+                change_requesters: Array.from(latestReviews.values())
+                    .filter(r => r.state === 'CHANGES_REQUESTED')
+                    .map(r => r.user.login)
+            };
+
             return {
                 url: prUrl,
                 title: pr.title,
@@ -114,7 +142,8 @@ export class GitHubService {
                     name: check.name,
                     status: check.status,
                     conclusion: check.conclusion
-                }))
+                })),
+                reviews: reviewSummary
             };
         } catch (error) {
             console.error(`Error fetching PR status for ${prUrl}:`, error.message);

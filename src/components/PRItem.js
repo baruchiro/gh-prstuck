@@ -47,6 +47,49 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
         return text.split('').join(titleDecorator) + titleDecorator;
     };
 
+    // Review status indicators
+    const renderReviewStatus = () => {
+        if (!pr.reviews) return null;
+
+        const reviewInfo = [];
+
+        // Show reviewers who requested changes
+        if (pr.reviews.changes_requested > 0) {
+            reviewInfo.push(
+                <Text key="changes" color="red">✗ </Text>,
+                <Text key="changes-names" color="gray">{pr.reviews.change_requesters?.join(', ') || ''}</Text>
+            );
+        }
+
+        // Show pending reviewers (excluding those who approved)
+        const pendingReviewers = pr.reviews.reviewers?.filter(reviewer =>
+            !pr.reviews.approvers?.includes(reviewer)
+        );
+
+        if (pendingReviewers?.length > 0) {
+            if (reviewInfo.length > 0) reviewInfo.push(<Text key="separator2"> | </Text>);
+            reviewInfo.push(
+                <Text key="pending" color="yellow">◯ </Text>,
+                <Text key="pending-names" color="gray">{pendingReviewers.join(', ')}</Text>
+            );
+        }
+
+        if (reviewInfo.length === 0) return null;
+
+        return (
+            <Box marginLeft={level > 0 ? 4 : 2}>
+                {reviewInfo}
+            </Box>
+        );
+    };
+
+    // Check if PR is fully approved
+    const isFullyApproved = pr.reviews &&
+        pr.reviews.approved > 0 &&
+        pr.reviews.changes_requested === 0 &&
+        (!pr.reviews.reviewers?.length ||
+            pr.reviews.reviewers.every(reviewer => pr.reviews.approvers?.includes(reviewer)));
+
     return (
         <Box flexDirection="column">
             <Box>
@@ -56,7 +99,10 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
                 <Text bold={isBold} color={titleColor}>
                     {createHyperlink(decorateText(pr.title), pr.url)}
                 </Text>
+                {isFullyApproved && <Text color="green"> ✓</Text>}
             </Box>
+
+            {renderReviewStatus()}
 
             {pr.issues && pr.issues.length > 0 && (
                 <Box flexDirection="column" marginLeft={2 + titlePadding}>

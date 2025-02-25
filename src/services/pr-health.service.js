@@ -43,7 +43,8 @@ export class PRHealthService {
             status: issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY',
             issues: issues.length > 0 ? issues : [],
             base: result.base,
-            head: result.head
+            head: result.head,
+            reviews: result.reviews
         };
     }
 } 
