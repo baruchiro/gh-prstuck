@@ -135,6 +135,31 @@ const findDependentFeatures = (targetFeature, features) => {
         .map(([name]) => name);
 };
 
+// Render legend for PR status indicators
+const renderLegend = () => {
+    return (
+        <Box flexDirection="column" marginTop={1} marginBottom={1} borderStyle="round" paddingX={1}>
+            <Text bold>Legend:</Text>
+            <Box>
+                <Text color="green">●</Text>
+                <Text> Open PR  </Text>
+                <Text color="gray">○</Text>
+                <Text> Draft PR  </Text>
+                <Text color="#2E8B57">✓</Text>
+                <Text> Merged PR  </Text>
+                <Text color="magenta">👁️</Text>
+                <Text> Waiting for your review</Text>
+            </Box>
+            <Box>
+                <Text color="red">•</Text>
+                <Text> PR has issues  </Text>
+                <Text color="green">✓</Text>
+                <Text> Fully approved</Text>
+            </Box>
+        </Box>
+    );
+};
+
 const PRHealthDisplay = ({ results }) => {
     if (!results) {
         console.error('PRHealthDisplay received null/undefined results');
@@ -181,6 +206,7 @@ const PRHealthDisplay = ({ results }) => {
 
     return (
         <Box flexDirection="column" padding={1}>
+            {renderLegend()}
             {rootFeatures.map(featureName => renderFeatureTree(featureName))}
             {/* Render any features that weren't part of the dependency tree */}
             {Object.keys(features)

@@ -1,16 +1,19 @@
 import { EventEmitter } from 'events';
+import { GitHubService } from '../services/github.service.js';
 import { PRHealthService } from '../services/pr-health.service.js';
 
 export class PRHealthStore extends EventEmitter {
     constructor() {
         super();
         this.prHealthService = new PRHealthService();
+        this.githubService = new GitHubService();
         this.results = {
             Features: {},
             prs: {}
         };
         this.loading = true;
         this.error = null;
+        this.prsToReview = [];
     }
 
     getState() {
@@ -31,6 +34,10 @@ export class PRHealthStore extends EventEmitter {
         this.emit('stateChanged', this.getState());
 
         try {
+            // Fetch PRs waiting for review
+            this.prsToReview = await this.githubService.getPRsToReview();
+            const prsToReviewUrls = new Set(this.prsToReview.map(pr => pr.url));
+
             const features = Object.entries(featurePRs.Features || featurePRs);
             const promises = [];
 
@@ -46,7 +53,9 @@ export class PRHealthStore extends EventEmitter {
                 // Create an array of promises that will each update the state when resolved
                 const prPromises = this.results.Features[featureName].prs.map(async (pr) => {
                     try {
-                        const prResult = await this.prHealthService.checkPRHealth(pr);
+                        // Pass the set of PRs waiting for review to the health service
+                        const prResult = await this.prHealthService.checkPRHealth(pr, prsToReviewUrls);
+
                         // Store PR results in the prs map
                         this.results.prs[pr] = prResult;
                         this.emit('stateChanged', this.getState());

@@ -12,6 +12,7 @@ Managing multiple open PRs can be chaotic and frustrating:
 - 📦 **Dependencies**: PRs that can't merge until other PRs are merged first
 - 👥 **Team Coordination**: PRs blocked waiting for other team members' work
 - 🌐 **Cross-Repo Dependencies**: PRs that depend on changes in different repositories
+- 👁️ **Review Requests**: PRs from others waiting for your review that need your attention
 
 ## ✨ How PRStuck Helps
 
@@ -19,6 +20,7 @@ Managing multiple open PRs can be chaotic and frustrating:
   - Instantly spot which PRs have conflicts or failing CI
   - See which PRs are waiting for reviews
   - Track PRs blocked by dependencies
+  - Identify PRs waiting for your review
   
 - 📚 **Stack Better**: 
   - Visualize PR dependencies in a clear hierarchy

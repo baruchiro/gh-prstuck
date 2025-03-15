@@ -5,7 +5,7 @@ export class PRHealthService {
         this.githubService = new GitHubService();
     }
 
-    async checkPRHealth(pr) {
+    async checkPRHealth(pr, prsToReviewUrls = new Set()) {
         const result = await this.githubService.getPRStatus(pr);
 
         if (result.error) {
@@ -34,6 +34,9 @@ export class PRHealthService {
             }
         }
 
+        // Check if this PR is waiting for the user's review
+        const waitingForReview = prsToReviewUrls.has(result.url);
+
         return {
             url: result.url,
             title: result.title,
@@ -44,7 +47,8 @@ export class PRHealthService {
             issues: issues.length > 0 ? issues : [],
             base: result.base,
             head: result.head,
-            reviews: result.reviews
+            reviews: result.reviews,
+            waitingForReview
         };
     }
 } 
