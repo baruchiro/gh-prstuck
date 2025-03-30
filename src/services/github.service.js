@@ -1,29 +1,112 @@
+import { graphql } from '@octokit/graphql';
 import { Octokit } from '@octokit/rest';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const prFragment = `
+fragment prFields on PullRequest {
+    url
+    title
+    isDraft
+    repository {
+        name
+    }
+}`;
+
+const prDetailsFragment = `
+fragment prDetailsFields on PullRequest {
+    ...prFields
+    mergeable
+    mergeStateStatus
+    state
+    merged
+    baseRef {
+        name
+        target { oid }
+        repository { nameWithOwner }
+    }
+    headRef {
+        name
+        target { oid }
+        repository { nameWithOwner }
+    }
+    commits(last: 1) {
+        nodes {
+            commit {
+                checkSuites(first: 10) {
+                    nodes {
+                        checkRuns(first: 20) {
+                            nodes {
+                                name
+                                status
+                                conclusion
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    reviews(first: 100) {
+        nodes {
+            author { login }
+            state
+        }
+    }
+    reviewRequests(first: 100) {
+        nodes {
+            requestedReviewer {
+                ... on User { login }
+            }
+        }
+    }
+}`;
+
+const searchPRsQuery = `
+${prFragment}
+query($queryString: String!) {
+    search(query: $queryString, type: ISSUE, first: 100) {
+        nodes {
+            ...prFields
+        }
+    }
+}`;
+
+const getPRStatusQuery = `
+${prFragment}
+${prDetailsFragment}
+query($owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) {
+        pullRequest(number: $number) {
+            ...prDetailsFields
+        }
+    }
+}`;
 
 export class GitHubService {
     constructor() {
         this.octokit = new Octokit({
             auth: process.env.GITHUB_TOKEN
         });
+        this.graphqlWithAuth = graphql.defaults({
+            headers: {
+                authorization: `token ${process.env.GITHUB_TOKEN}`,
+            },
+        });
     }
 
-    async getMyPRs() {
+    async searchPRs(query) {
         try {
-            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
-                q: 'is:pr is:open author:@me',
-                sort: 'updated',
-                order: 'desc',
-                per_page: 100
+            const { search: { nodes } } = await this.graphqlWithAuth(searchPRsQuery, {
+                queryString: query
             });
 
-            return prs.items.map(pr => ({
-                url: pr.html_url,
+            return nodes.map(pr => ({
+                url: pr.url,
                 title: pr.title,
-                draft: pr.draft || false,
-                repository: pr.repository_url.split('/').slice(-1)[0]
+                draft: pr.isDraft,
+                repository: pr.repository.name
             }));
         } catch (error) {
             console.error('Error fetching PRs:', error.message);
@@ -31,117 +114,77 @@ export class GitHubService {
         }
     }
 
-    async getPRsToReview() {
-        try {
-            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
-                q: 'is:pr is:open review-requested:@me',
-                sort: 'updated',
-                order: 'desc',
-                per_page: 100
-            });
+    async getMyPRs() {
+        return this.searchPRs('is:pr is:open author:@me');
+    }
 
-            return prs.items.map(pr => ({
-                url: pr.html_url,
-                title: pr.title,
-                draft: pr.draft || false,
-                repository: pr.repository_url.split('/').slice(-1)[0]
-            }));
-        } catch (error) {
-            console.error('Error fetching PRs to review:', error.message);
-            throw error;
-        }
+    async getPRsToReview() {
+        return this.searchPRs('is:pr is:open review-requested:@me');
     }
 
     async getAssignedPRs() {
-        try {
-            const { data: prs } = await this.octokit.search.issuesAndPullRequests({
-                q: 'is:pr is:open assignee:@me',
-                sort: 'updated',
-                order: 'desc',
-                per_page: 100
-            });
-
-            return prs.items.map(pr => ({
-                url: pr.html_url,
-                title: pr.title,
-                draft: pr.draft || false,
-                repository: pr.repository_url.split('/').slice(-1)[0]
-            }));
-        } catch (error) {
-            console.error('Error fetching assigned PRs:', error.message);
-            throw error;
-        }
+        return this.searchPRs('is:pr is:open assignee:@me');
     }
 
     async getPRStatus(prUrl) {
         try {
-            // Extract owner, repo, and PR number from URL
             const [, , , owner, repo, , prNumber] = prUrl.split('/');
 
-            // Get PR details
-            const { data: pr } = await this.octokit.pulls.get({
+            const { repository: { pullRequest: pr } } = await this.graphqlWithAuth(getPRStatusQuery, {
                 owner,
                 repo,
-                pull_number: parseInt(prNumber)
-            });
-
-            // Get check runs
-            const { data: checks } = await this.octokit.checks.listForRef({
-                owner,
-                repo,
-                ref: pr.head.sha
-            });
-
-            // Get reviews
-            const { data: reviews } = await this.octokit.pulls.listReviews({
-                owner,
-                repo,
-                pull_number: parseInt(prNumber)
+                number: parseInt(prNumber)
             });
 
             // Process reviews to get latest state per reviewer
             const latestReviews = new Map();
-            reviews.forEach(review => {
-                if (review.state !== 'COMMENTED') { // Only track approval/rejection states
-                    latestReviews.set(review.user.login, review);
+            pr.reviews.nodes.forEach(review => {
+                if (review.state !== 'COMMENTED') {
+                    latestReviews.set(review.author.login, review);
                 }
             });
+
+            // Flatten check runs from all check suites
+            const checkRuns = pr.commits.nodes[0].commit.checkSuites.nodes
+                .flatMap(suite => suite.checkRuns.nodes)
+                .filter(Boolean);
 
             const reviewSummary = {
                 approved: Array.from(latestReviews.values()).filter(r => r.state === 'APPROVED').length,
                 changes_requested: Array.from(latestReviews.values()).filter(r => r.state === 'CHANGES_REQUESTED').length,
-                reviewers: pr.requested_reviewers.map(r => r.login),
-                // Add reviewer names
+                reviewers: pr.reviewRequests.nodes
+                    .map(request => request.requestedReviewer?.login)
+                    .filter(Boolean),
                 approvers: Array.from(latestReviews.values())
                     .filter(r => r.state === 'APPROVED')
-                    .map(r => r.user.login),
+                    .map(r => r.author.login),
                 change_requesters: Array.from(latestReviews.values())
                     .filter(r => r.state === 'CHANGES_REQUESTED')
-                    .map(r => r.user.login)
+                    .map(r => r.author.login)
             };
 
             return {
-                url: prUrl,
+                url: pr.url,
                 title: pr.title,
-                draft: pr.draft,
-                mergeable: pr.mergeable,
-                mergeable_state: pr.mergeable_state,
-                state: pr.state,
+                draft: pr.isDraft,
+                mergeable: pr.mergeable === 'MERGEABLE',
+                mergeable_state: pr.mergeStateStatus.toLowerCase(),
+                state: pr.state.toLowerCase(),
                 merged: pr.merged,
                 base: {
-                    ref: pr.base.ref,
-                    sha: pr.base.sha,
-                    repo: pr.base.repo.full_name
+                    ref: pr.baseRef.name,
+                    sha: pr.baseRef.target.oid,
+                    repo: pr.baseRef.repository.nameWithOwner
                 },
                 head: {
-                    ref: pr.head.ref,
-                    sha: pr.head.sha,
-                    repo: pr.head.repo.full_name
+                    ref: pr.headRef.name,
+                    sha: pr.headRef.target.oid,
+                    repo: pr.headRef.repository.nameWithOwner
                 },
-                checks: checks.check_runs.map(check => ({
+                checks: checkRuns.map(check => ({
                     name: check.name,
-                    status: check.status,
-                    conclusion: check.conclusion
+                    status: check.status.toLowerCase(),
+                    conclusion: check.conclusion?.toLowerCase()
                 })),
                 reviews: reviewSummary
             };
