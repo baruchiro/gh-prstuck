@@ -9,6 +9,8 @@ const getStatusColor = (status) => {
             return 'red';
         case 'ERROR':
             return 'yellow';
+        case 'MERGED':
+            return '#2E8B57'; // Sea green for merged PRs
         default:
             return 'white';
     }
@@ -36,7 +38,7 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
     // Replace circle indicators with eye icon if PR is waiting for review
     if (waitingForReview) {
         stateIndicator = '👁️';  // Eye icon without extra space
-    } else if (pr.merged) {
+    } else if (pr.merged || pr.status === 'MERGED') {
         stateIndicator = '✓';  // No extra space
         stateColor = '#2E8B57'; // Sea green - more muted but still clearly "success"
         titleColor = '#708090'; // Slate gray - readable but de-emphasized

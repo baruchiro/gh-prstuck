@@ -11,6 +11,7 @@ export class PRHealthService {
         if (result.error) {
             return {
                 url: result.url,
+                title: result.title || 'Unknown PR',
                 status: 'ERROR',
                 issues: [result.error]
             };
@@ -18,8 +19,8 @@ export class PRHealthService {
 
         const issues = [];
 
-        // Check mergeability
-        if (result.mergeable === false) {
+        // Skip mergeability check for merged PRs
+        if (!result.merged && result.mergeable === false) {
             issues.push('Has conflicts');
         }
 
@@ -43,7 +44,7 @@ export class PRHealthService {
             draft: result.draft,
             state: result.state,
             merged: result.merged,
-            status: issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY',
+            status: result.merged ? 'MERGED' : (issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY'),
             issues: issues.length > 0 ? issues : [],
             base: result.base,
             head: result.head,

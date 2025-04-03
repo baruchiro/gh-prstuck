@@ -176,11 +176,11 @@ export class GitHubService {
                     sha: pr.baseRef.target.oid,
                     repo: pr.baseRef.repository.nameWithOwner
                 },
-                head: {
+                head: pr.headRef ? {
                     ref: pr.headRef.name,
                     sha: pr.headRef.target.oid,
                     repo: pr.headRef.repository.nameWithOwner
-                },
+                } : null,
                 checks: checkRuns.map(check => ({
                     name: check.name,
                     status: check.status.toLowerCase(),
