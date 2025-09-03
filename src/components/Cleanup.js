@@ -1,5 +1,6 @@
 import { Box, Text, useInput, useStdout } from 'ink';
 import React, { useEffect, useState } from 'react';
+import { GitHubService } from '../services/github.service.js';
 import { PRHealthService } from '../services/pr-health.service.js';
 
 const padToWidth = (str, width) => {
@@ -13,6 +14,7 @@ const Cleanup = ({ existingFeatures, onSave }) => {
     const { stdout } = useStdout();
     const visibleItems = stdout.rows - 5;
     const prHealthService = new PRHealthService();
+    const githubService = new GitHubService();
 
     const [state, setState] = useState({
         loading: true,
@@ -23,7 +25,8 @@ const Cleanup = ({ existingFeatures, onSave }) => {
         scrollOffset: 0,
         prStatuses: new Map(),
         repoColumnWidth: 20,
-        listType: 'prs' // 'prs' or 'features'
+        listType: 'prs', // 'prs' or 'features'
+        currentUser: null
     });
 
     const loadPRStatuses = async () => {
@@ -31,6 +34,8 @@ const Cleanup = ({ existingFeatures, onSave }) => {
         const statuses = new Map();
 
         try {
+            const currentUser = await githubService.getCurrentUser();
+
             for (const feature of Object.values(existingFeatures.Features || {})) {
                 if (!feature.prs) continue;
                 for (const pr of feature.prs) {
@@ -54,7 +59,8 @@ const Cleanup = ({ existingFeatures, onSave }) => {
                 ...s,
                 loading: false,
                 prStatuses: statuses,
-                repoColumnWidth: maxRepoLength + 2
+                repoColumnWidth: maxRepoLength + 2,
+                currentUser
             }));
         } catch (error) {
             setState(s => ({
@@ -200,6 +206,8 @@ const Cleanup = ({ existingFeatures, onSave }) => {
                     const isSelected = state.selectedPRs.has(pr.url);
                     const isCurrentSelection = actualIndex === state.selectedIndex;
 
+                    const showAuthor = state.currentUser && pr.author && pr.author !== state.currentUser;
+
                     return (
                         <Box key={pr.url}>
                             <Text color={isCurrentSelection ? 'blue' : 'white'}>
@@ -210,7 +218,9 @@ const Cleanup = ({ existingFeatures, onSave }) => {
                                 <Text color="gray">[{padToWidth(pr.repository, state.repoColumnWidth - 2)}]</Text>
                             </Box>
                             <Text color={isSelected ? 'gray' : 'white'}>
-                                {pr.title} {pr.merged ? '(merged)' : '(closed)'}
+                                {pr.title}
+                                {showAuthor && <Text color="gray"> by {pr.author}</Text>}
+                                <Text color="gray"> {pr.merged ? '(merged)' : '(closed)'}</Text>
                             </Text>
                         </Box>
                     );

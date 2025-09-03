@@ -26,7 +26,8 @@ const PRSelector = ({ existingFeatures, onSave }) => {
         repoColumnWidth: 20,
         selectedPRs: new Set(Object.values(existingFeatures.Features || {}).flatMap(feature => feature.prs || [])),
         updatedFeatures: existingFeatures,
-        listType: 'authored' // 'authored' or 'review' or 'assigned'
+        listType: 'authored', // 'authored' or 'review' or 'assigned'
+        currentUser: null
     });
 
     const findNextAvailablePR = (currentIndex, direction = 1) => {
@@ -43,11 +44,12 @@ const PRSelector = ({ existingFeatures, onSave }) => {
         setState(s => ({ ...s, loading: true, error: null }));
         try {
             const github = new GitHubService();
-            const prs = await (
+            const [prs, currentUser] = await Promise.all([
                 type === 'authored' ? github.getMyPRs() :
                     type === 'review' ? github.getPRsToReview() :
-                        github.getAssignedPRs()
-            );
+                        github.getAssignedPRs(),
+                github.getCurrentUser()
+            ]);
 
             const maxRepoLength = Math.min(
                 30,
@@ -68,6 +70,7 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                 ...s,
                 loading: false,
                 prs,
+                currentUser,
                 selectedPR: initialSelectedPR,
                 scrollOffset: 0,
                 repoColumnWidth: maxRepoLength + 2
@@ -259,6 +262,8 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                         if (isSelected) textColor = 'gray';
                         else if (isCurrentSelection) textColor = 'blue';
 
+                        const showAuthor = state.currentUser && pr.author && pr.author !== state.currentUser;
+
                         return (
                             <Box key={pr.url}>
                                 <Text color={textColor}>
@@ -268,7 +273,9 @@ const PRSelector = ({ existingFeatures, onSave }) => {
                                     <Text color="gray">[{padToWidth(pr.repository, state.repoColumnWidth - 2)}]</Text>
                                 </Box>
                                 <Text color={textColor}>
-                                    {pr.title} {isSelected && <Text color="yellow">(already in a feature)</Text>}
+                                    {pr.title}
+                                    {showAuthor && <Text color="gray"> by {pr.author}</Text>}
+                                    {isSelected && <Text color="yellow"> (already in a feature)</Text>}
                                 </Text>
                             </Box>
                         );

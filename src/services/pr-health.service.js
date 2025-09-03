@@ -42,6 +42,7 @@ export class PRHealthService {
             url: result.url,
             title: result.title,
             draft: result.draft,
+            author: result.author,
             state: result.state,
             merged: result.merged,
             status: result.merged ? 'MERGED' : (issues.length === 0 ? 'HEALTHY' : 'UNHEALTHY'),

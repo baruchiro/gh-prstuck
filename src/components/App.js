@@ -53,7 +53,7 @@ const App = ({ prListsFile }) => {
                 </Box>
             )}
             {Object.keys(state.results).length > 0 && !state.loading && !refreshing && (
-                <PRHealthDisplay results={state.results} />
+                <PRHealthDisplay results={state.results} currentUser={state.currentUser} />
             )}
         </Box>
     );

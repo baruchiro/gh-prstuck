@@ -9,6 +9,9 @@ fragment prFields on PullRequest {
     url
     title
     isDraft
+    author {
+        login
+    }
     repository {
         name
     }
@@ -94,6 +97,22 @@ export class GitHubService {
                 authorization: `token ${process.env.GITHUB_TOKEN}`,
             },
         });
+        this.currentUser = null;
+    }
+
+    async getCurrentUser() {
+        if (this.currentUser) {
+            return this.currentUser;
+        }
+
+        try {
+            const { data } = await this.octokit.rest.users.getAuthenticated();
+            this.currentUser = data.login;
+            return this.currentUser;
+        } catch (error) {
+            console.error('Error fetching current user:', error.message);
+            throw error;
+        }
     }
 
     async searchPRs(query) {
@@ -106,6 +125,7 @@ export class GitHubService {
                 url: pr.url,
                 title: pr.title,
                 draft: pr.isDraft,
+                author: pr.author.login,
                 repository: pr.repository.name
             }));
         } catch (error) {
@@ -167,6 +187,7 @@ export class GitHubService {
                 url: pr.url,
                 title: pr.title,
                 draft: pr.isDraft,
+                author: pr.author.login,
                 mergeable: pr.mergeable === 'MERGEABLE',
                 mergeable_state: pr.mergeStateStatus.toLowerCase(),
                 state: pr.state.toLowerCase(),

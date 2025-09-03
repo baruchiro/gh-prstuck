@@ -83,7 +83,7 @@ const buildPRTree = (prs) => {
 };
 
 // Render PR tree recursively
-const renderPRTree = (pr, level = 0) => {
+const renderPRTree = (pr, level = 0, currentUser = null) => {
     if (!pr || !pr.url) {
         console.error('Invalid PR object in renderPRTree:', pr);
         return null;
@@ -91,14 +91,14 @@ const renderPRTree = (pr, level = 0) => {
 
     return (
         <Box key={pr.url} flexDirection="column">
-            <PRItem pr={pr} level={level} />
-            {pr.children?.map?.(child => renderPRTree(child, level + 1))}
+            <PRItem pr={pr} level={level} currentUser={currentUser} />
+            {pr.children?.map?.(child => renderPRTree(child, level + 1, currentUser))}
         </Box>
     );
 };
 
 // Render a feature's content
-const renderFeatureContent = (featureName, feature, features, prsData, level = 0) => {
+const renderFeatureContent = (featureName, feature, features, prsData, level = 0, currentUser = null) => {
     if (!feature || !Array.isArray(feature.prs)) {
         console.error('Invalid feature data:', { featureName, feature });
         return (
@@ -119,7 +119,7 @@ const renderFeatureContent = (featureName, feature, features, prsData, level = 0
                     <Box marginLeft={2 + indent}>
                         <Text color="gray">{padToWidth(repo, REPO_COLUMN_WIDTH)}</Text>
                         <Box flexDirection="column">
-                            {buildPRTree(repoPRs).map(pr => renderPRTree(pr))}
+                            {buildPRTree(repoPRs).map(pr => renderPRTree(pr, 0, currentUser))}
                         </Box>
                     </Box>
                 </Box>
@@ -160,7 +160,7 @@ const renderLegend = () => {
     );
 };
 
-const PRHealthDisplay = ({ results }) => {
+const PRHealthDisplay = ({ results, currentUser }) => {
     if (!results) {
         console.error('PRHealthDisplay received null/undefined results');
         return <Text color="red">Error: No results data provided</Text>;
@@ -193,7 +193,7 @@ const PRHealthDisplay = ({ results }) => {
 
         return (
             <Box key={featureName} flexDirection="column" marginLeft={level * 2}>
-                {renderFeatureContent(featureName, feature, features, prsData, level)}
+                {renderFeatureContent(featureName, feature, features, prsData, level, currentUser)}
                 {dependentFeatures.map(depFeature => (
                     <Box key={depFeature} flexDirection="column" marginLeft={2}>
                         <Text color="gray">↓ Required by:</Text>

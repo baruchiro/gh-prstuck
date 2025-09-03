@@ -21,7 +21,7 @@ const createHyperlink = (text, url) => {
     return `\u001B]8;;${url}\u0007${text}\u001B]8;;\u0007`;
 };
 
-const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
+const PRItem = ({ pr, isFirstInRepo, level = 0, currentUser = null }) => {
     const statusColor = getStatusColor(pr.status);
     const titlePadding = level > 0 ? ('  '.repeat(level - 1) + '└──').length : 0;
 
@@ -98,6 +98,9 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
         (!pr.reviews.reviewers?.length ||
             pr.reviews.reviewers.every(reviewer => pr.reviews.approvers?.includes(reviewer)));
 
+    // Show author if PR is not by current user
+    const showAuthor = currentUser && pr.author && pr.author !== currentUser;
+
     return (
         <Box flexDirection="column">
             <Box>
@@ -108,6 +111,7 @@ const PRItem = ({ pr, isFirstInRepo, level = 0 }) => {
                 <Text bold={isBold} color={titleColor}>
                     {createHyperlink(decorateText(pr.title), pr.url)}
                 </Text>
+                {showAuthor && <Text color="gray"> by {pr.author}</Text>}
                 {isFullyApproved && <Text color="green"> ✓</Text>}
             </Box>
 

@@ -14,13 +14,15 @@ export class PRHealthStore extends EventEmitter {
         this.loading = true;
         this.error = null;
         this.prsToReview = [];
+        this.currentUser = null;
     }
 
     getState() {
         return {
             results: this.results,
             loading: this.loading,
-            error: this.error
+            error: this.error,
+            currentUser: this.currentUser
         };
     }
 
@@ -34,6 +36,9 @@ export class PRHealthStore extends EventEmitter {
         this.emit('stateChanged', this.getState());
 
         try {
+            // Get current user
+            this.currentUser = await this.githubService.getCurrentUser();
+
             // Fetch PRs waiting for review
             this.prsToReview = await this.githubService.getPRsToReview();
             const prsToReviewUrls = new Set(this.prsToReview.map(pr => pr.url));
