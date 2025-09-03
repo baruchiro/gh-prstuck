@@ -128,10 +128,10 @@ const renderFeatureContent = (featureName, feature, features, prsData, level = 0
     );
 };
 
-// Find features that depend on the given feature
+// Find features that depend on the given feature and have PRs
 const findDependentFeatures = (targetFeature, features) => {
     return Object.entries(features)
-        .filter(([name, feature]) => feature.dependencies?.includes(targetFeature))
+        .filter(([name, feature]) => feature.dependencies?.includes(targetFeature) && feature.prs?.length > 0)
         .map(([name]) => name);
 };
 
@@ -174,9 +174,9 @@ const PRHealthDisplay = ({ results }) => {
         return <Text color="yellow">No features found in the data</Text>;
     }
 
-    // Find root features (those with no dependencies)
+    // Find root features (those with no dependencies and have PRs)
     const rootFeatures = Object.entries(features)
-        .filter(([_, feature]) => !feature.dependencies?.length)
+        .filter(([_, feature]) => !feature.dependencies?.length && feature.prs?.length > 0)
         .map(([name]) => name);
 
     // Track rendered features to avoid duplicates
@@ -208,9 +208,9 @@ const PRHealthDisplay = ({ results }) => {
         <Box flexDirection="column" padding={1}>
             {renderLegend()}
             {rootFeatures.map(featureName => renderFeatureTree(featureName))}
-            {/* Render any features that weren't part of the dependency tree */}
+            {/* Render any features that weren't part of the dependency tree and have PRs */}
             {Object.keys(features)
-                .filter(name => !renderedFeatures.has(name))
+                .filter(name => !renderedFeatures.has(name) && features[name].prs?.length > 0)
                 .map(featureName => renderFeatureTree(featureName))}
         </Box>
     );
