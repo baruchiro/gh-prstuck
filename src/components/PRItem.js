@@ -69,6 +69,15 @@ const PRItem = ({ pr, isFirstInRepo, level = 0, currentUser = null }) => {
             );
         }
 
+        // Show approved reviewers
+        if (pr.reviews.approvers?.length > 0) {
+            if (reviewInfo.length > 0) reviewInfo.push(<Text key="separator1"> | </Text>);
+            reviewInfo.push(
+                <Text key="approved" color="green">✓ </Text>,
+                <Text key="approved-names" color="gray">{pr.reviews.approvers.join(', ')}</Text>
+            );
+        }
+
         // Show pending reviewers (excluding those who approved)
         const pendingReviewers = pr.reviews.reviewers?.filter(reviewer =>
             !pr.reviews.approvers?.includes(reviewer)
