@@ -44,6 +44,8 @@ fragment prDetailsFields on PullRequest {
                                 name
                                 status
                                 conclusion
+                                startedAt
+                                completedAt
                             }
                         }
                     }
@@ -205,7 +207,9 @@ export class GitHubService {
                 checks: checkRuns.map(check => ({
                     name: check.name,
                     status: check.status.toLowerCase(),
-                    conclusion: check.conclusion?.toLowerCase()
+                    conclusion: check.conclusion?.toLowerCase(),
+                    startedAt: check.startedAt,
+                    completedAt: check.completedAt
                 })),
                 reviews: reviewSummary
             };
