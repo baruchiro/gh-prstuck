@@ -24,10 +24,16 @@ export class PRHealthService {
             issues.push('Has conflicts');
         }
 
-        // Check CI status
+        // Check CI status - only consider checks that actually ran and have a conclusion
         if (result.checks && result.checks.length > 0) {
-            const failingChecks = result.checks.filter(check =>
-                check.conclusion && check.conclusion !== 'success'
+            const triggeredChecks = result.checks.filter(check =>
+                check.conclusion !== null &&
+                check.conclusion !== undefined &&
+                check.conclusion !== 'skipped'
+            );
+
+            const failingChecks = triggeredChecks.filter(check =>
+                check.conclusion !== 'success'
             );
 
             if (failingChecks.length > 0) {
